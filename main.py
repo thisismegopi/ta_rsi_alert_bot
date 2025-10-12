@@ -5,7 +5,6 @@ import pandas_ta as ta
 import requests
 import os
 
-from datetime import timedelta
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -61,31 +60,37 @@ def task():
             "WIPRO.NS",
             "ZYDUSLIFE.NS",
         ]
-        from_date = datetime.today() - timedelta(days=90)
-        to_date = datetime.today()
-        interval = "1d"
 
-        msg1 = "**RSI below 35:**\n"
-        msg2 = "\n\n**RSI above 65:**\n"
+        # Download historical data for the tickers
+        data = yf.download(
+            tickers=tickers,
+            period="90d",
+            interval="1d",
+            multi_level_index=False,
+        )
+
+        # Indicator Configuration
+        LENGTH = 14
+        MAMODE = "rma"
+        LOWER_LIMIT = 36
+        UPPER_LIMIT = 64
+
+        msg1 = "RSI Indicator🚨\n\n**🔽 Crossing lower limit:**\n"
+        msg2 = "\n\n**🔼 Crossing upper limit:**\n"
         for ticker in tickers:
-            data = yf.download(
-                tickers=ticker,
-                start=from_date,
-                end=to_date,
-                interval=interval,
-                multi_level_index=False,
+            rsi = (
+                ta.rsi(
+                    data["Close"][ticker],
+                    length=LENGTH,
+                    mamode=MAMODE,
+                )
+                .tail(1)
+                .values[0]
             )
-            df = data.copy()
-
-            df["RSI"] = ta.rsi(
-                df["Close"],
-                length=14,
-                mamode="sma",
-            )
-            if df.tail(1)["RSI"].values[0] < 36:
-                msg1 += f"`{ticker}` - {df.tail(1)['RSI'].values[0].round(2)}\n"
-            if df.tail(1)["RSI"].values[0] > 64:
-                msg2 += f"`{ticker}` - {df.tail(1)['RSI'].values[0].round(2)}\n"
+            if rsi < LOWER_LIMIT:
+                msg1 += f"`{ticker}` - {rsi.round(2)}\n"
+            if rsi > UPPER_LIMIT:
+                msg2 += f"`{ticker}` - {rsi.round(2)}\n"
 
         data = requests.get(
             f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage?chat_id={CHAT_ID}&text={msg1 + msg2}&parse_mode=Markdown"
