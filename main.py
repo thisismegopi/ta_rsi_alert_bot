@@ -103,6 +103,7 @@ def task():
         print(f"An error occurred: {str(e)}")
 
 
-job = Job(runner_function=task)
-job.schedule_job()
-job.run()
+if __name__ == "__main__":
+    job = Job(runner_function=task)
+    job.schedule_job()
+    job.run()
