@@ -18,7 +18,7 @@ class Job:
         self.runner_function = runner_function
         self.schedule = schedule
 
-    def schedule_market_jobs(self):
+    def schedule_job(self):
         start_time = datetime.strptime("09:00", "%H:%M")
         end_time = datetime.strptime("16:00", "%H:%M")
         current = start_time
