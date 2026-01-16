@@ -5,7 +5,7 @@ import pandas_ta as ta
 import requests
 import os
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,14 +18,18 @@ class Job:
         self.runner_function = runner_function
         self.schedule = schedule
 
-    def schedule_job(self):
-        start_time = datetime.strptime("15:00", "%H:%M")
+    def schedule_market_jobs(self):
+        start_time = datetime.strptime("09:00", "%H:%M")
+        end_time = datetime.strptime("16:00", "%H:%M")
+        current = start_time
+        while current <= end_time:
+            # Schedule the job every 30 minutes
+            self.schedule.every().day.at(current.strftime("%H:%M")).do(
+                self.runner_function
+            )
 
-        self.schedule.every().day.at(start_time.strftime("%H:%M")).do(
-            self.runner_function
-        )
-
-        print(f"Scheduling job at {start_time.strftime('%H:%M')}")
+            print(f"Scheduling job at {current.strftime('%H:%M')}")
+            current += timedelta(minutes=30)
 
     def run(self):
         while True:
@@ -36,13 +40,11 @@ class Job:
 def task():
     try:
         tickers = [
-            "AGI.NS",
-            "ANGELONE.NS",
-            "AVANTIFEED.NS",
             "BAJAJHFL.NS",
             "CDSL.NS",
-            "CELLO.NS",
             "DRREDDY.NS",
+            "EPL.NS",
+            "FINCABLES.NS",
             "HEROMOTOCO.NS",
             "ICICIGI.NS",
             "IDFCFIRSTB.NS",
@@ -53,9 +55,10 @@ def task():
             "KTKBANK.NS",
             "MANAPPURAM.NS",
             "NATCOPHARM.NS",
-            "SOUTHBANK.NS",
-            "TATAMOTORS.NS",
-            "TATASTEEL.NS",
+            "TATATECH.NS",
+            "TMCV.NS",
+            "TMPV.NS",
+            "TRANSRAILL.NS",
             "VBL.NS",
             "WIPRO.NS",
             "ZYDUSLIFE.NS",
